@@ -1,0 +1,17 @@
+{
+  "packages": {
+    "Dataverse.Extensions.DependencyInjection": {
+      "release-type": "simple",
+      "package-name": "BauerApps.Dataverse.Extensions.DependencyInjection",
+      "include-component-in-tag": false,
+      "extra-files": [
+        "Dataverse.Extensions.DependencyInjection.csproj"
+      ],
+      "changelog-path": "CHANGELOG.md"
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
+
+
+
