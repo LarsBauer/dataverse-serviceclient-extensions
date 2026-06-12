@@ -5,7 +5,10 @@
       "package-name": "BauerApps.Dataverse.Extensions.DependencyInjection",
       "include-component-in-tag": false,
       "extra-files": [
-        "Dataverse.Extensions.DependencyInjection.csproj"
+        {
+          "type": "generic",
+          "path": "Dataverse.Extensions.DependencyInjection.csproj"
+        }
       ],
       "changelog-path": "CHANGELOG.md"
     }
