@@ -16,6 +16,7 @@
     <PackageProjectUrl>https://github.com/LarsBauer/dataverse-serviceclient-extensions</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/LarsBauer/dataverse-serviceclient-extensions/blob/main/Dataverse.Extensions.DependencyInjection/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>dataverse;dynamics;powerplatform;dependency-injection</PackageTags>
   </PropertyGroup>
 
@@ -34,6 +35,7 @@
   <ItemGroup>
     <None Include="..\LICENSE" Pack="true" PackagePath="" />
     <None Include="..\README.md" Pack="true" PackagePath="" />
+    <None Include="CHANGELOG.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
