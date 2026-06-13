@@ -5,12 +5,12 @@
 [![NuGet Downloads](https://img.shields.io/nuget/dt/BauerApps.Dataverse.Extensions.DependencyInjection)](https://www.nuget.org/packages/BauerApps.Dataverse.Extensions.DependencyInjection)
 [![License](https://img.shields.io/github/license/LarsBauer/dataverse-serviceclient-extensions)](LICENSE)
 
-Dependency injection extensions for [Microsoft Dataverse ServiceClient](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/dataverse-sdk-for-net). Registers a singleton `ServiceClient` and a scoped `IOrganizationServiceAsync2` (via `Clone()`) — the correct pattern most people get wrong.
+Dependency injection extensions for [Microsoft.PowerPlatform.Dataverse.Client](https://www.nuget.org/packages/Microsoft.PowerPlatform.Dataverse.Client). Registers a singleton `ServiceClient` and a scoped `IOrganizationServiceAsync2` (via `Clone()`) — the correct pattern most people get wrong.
 
 ## Features
 
 - One-line DI registration for `ServiceClient` with proper singleton + scoped `Clone()` lifecycle
-- Authentication via [Azure.Identity](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/identity-readme) (`DefaultAzureCredential` by default, any `TokenCredential` supported)
+- Authentication via [Azure.Identity](https://www.nuget.org/packages/Azure.Identity) (`DefaultAzureCredential` by default, any `TokenCredential` supported)
 - Automatic logger wiring from the DI container
 - Options validation at startup — fail fast on misconfiguration
 - Targeted at ASP.NET Core and Azure Functions
