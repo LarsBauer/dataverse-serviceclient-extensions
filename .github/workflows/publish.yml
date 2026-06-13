@@ -57,5 +57,5 @@ jobs:
         run: |
           PR_NUMBER=$(gh pr list --repo "${{ github.repository }}" --state merged --label "autorelease: tagged" --json number --jq '.[0].number')
           if [ -n "$PR_NUMBER" ]; then
-            gh pr edit "$PR_NUMBER" --repo "${{ github.repository }}" --add-label "autorelease: published"
+            gh pr edit "$PR_NUMBER" --repo "${{ github.repository }}" --add-label "autorelease: published" --remove-label "autorelease: tagged"
           fi
