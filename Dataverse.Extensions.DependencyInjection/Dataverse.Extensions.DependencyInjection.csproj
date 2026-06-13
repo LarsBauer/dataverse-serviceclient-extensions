@@ -10,9 +10,13 @@
     <Version>1.0.0</Version> <!-- x-release-please-version -->
     <Description>Dependency injection extensions for Microsoft Dataverse ServiceClient.</Description>
     <Authors>Lars Bauer</Authors>
+    <Copyright>Copyright (c) Lars Bauer</Copyright>
     <RepositoryUrl>https://github.com/LarsBauer/dataverse-serviceclient-extensions.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/LarsBauer/dataverse-serviceclient-extensions</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/LarsBauer/dataverse-serviceclient-extensions/blob/main/Dataverse.Extensions.DependencyInjection/CHANGELOG.md</PackageReleaseNotes>
     <PackageTags>dataverse;dynamics;powerplatform;dependency-injection</PackageTags>
   </PropertyGroup>
 
@@ -29,14 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\LICENSE">
-      <Link>LICENSE</Link>
-    </Content>
-    <Content Include="..\README.md">
-      <Link>README.md</Link>
-    </Content>
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\README.md" Pack="true" PackagePath="" />
+    <None Include="CHANGELOG.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
-
-
