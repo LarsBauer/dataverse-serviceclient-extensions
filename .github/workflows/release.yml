@@ -12,48 +12,7 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
-
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-
     steps:
       - uses: googleapis/release-please-action@v4
-        id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-  publish:
-    needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.x
-
-      - name: Restore dependencies
-        run: dotnet restore Dataverse.Extensions.slnx
-
-      - name: Build
-        run: dotnet build Dataverse.Extensions.slnx --configuration Release --no-restore
-
-      - name: Run tests
-        run: dotnet test Dataverse.Extensions.slnx --configuration Release --no-build
-
-      - name: Pack NuGet package
-        run: dotnet pack Dataverse.Extensions.DependencyInjection/Dataverse.Extensions.DependencyInjection.csproj --configuration Release --no-build --output ./artifacts
-
-      - name: NuGet login (OIDC → temp API key)
-        uses: NuGet/login@v1
-        id: login
-        with:
-          user: ${{ secrets.NUGET_USER }}
-
-      - name: Publish NuGet package
-        run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate
