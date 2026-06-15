@@ -45,6 +45,36 @@ Solution uses `.slnx` format (XML-based), not `.sln`. Tests use **TUnit** (not x
 - **CI** (`.github/workflows/ci.yml`): Builds and tests on every push/PR to `main`.
 - **Release** (`.github/workflows/release.yml`): On push to `main`, release-please opens/updates a Release PR. Merging it creates a GitHub release + tag, then publishes to NuGet via [trusted publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing) (OIDC via `NuGet/login@v1`, no long-lived API key).
 
+## Release process
+
+Releases are fully automated by **release-please**; never bump the version, edit `CHANGELOG.md`, or tag manually. The version flow is driven entirely by commit messages, so writing correct [Conventional Commits](https://www.conventionalcommits.org/) is what makes the process work.
+
+**Configuration**:
+
+- `release-please-config.json` — `release-type: simple` for the single package `BauerApps.Dataverse.Extensions.DependencyInjection`. `include-component-in-tag: false` (tags are plain `vX.Y.Z`). The csproj is listed as a `generic` extra-file so its `<Version>` (marked with `<!-- x-release-please-version -->`) is updated on release. Changelog is written to `Dataverse.Extensions.DependencyInjection/CHANGELOG.md`.
+- `.release-please-manifest.json` — the current released version, keyed by package directory. Do not edit by hand; release-please maintains it.
+
+**Commit message rules** (these determine the next version bump):
+
+| Commit prefix | Example | Version effect | Changelog section |
+| --- | --- | --- | --- |
+| `feat:` | `feat: add DeferConnection option` | minor (`1.2.0` → `1.3.0`) | Features |
+| `fix:` | `fix: clone client per scope correctly` | patch (`1.2.0` → `1.2.1`) | Bug Fixes |
+| `feat!:` / `fix!:` or `BREAKING CHANGE:` footer | `feat!: require TokenCredential` | major (`1.2.0` → `2.0.0`) | ⚠ Breaking Changes |
+| `docs:`, `chore:`, `test:`, `refactor:`, `ci:`, `build:`, `perf:` | `docs: update AGENTS.md` | no release (most are hidden from changelog) | — |
+
+Notes:
+- The commit **subject** is what lands in the changelog, so write it for humans reading release notes.
+- Scopes are optional (e.g. `feat(di): ...`); they don't affect the bump.
+- Squash-merge PRs with a Conventional Commit title so the merged commit is well-formed.
+
+**Typical workflow**:
+
+1. Open a PR with Conventional Commit message(s) and merge to `main`.
+2. release-please opens (or updates) a **Release PR** that bumps the version, updates `CHANGELOG.md`, and updates `.release-please-manifest.json`.
+3. Review and merge the Release PR. This creates the GitHub release + `vX.Y.Z` tag.
+4. The `publish` job (gated on `release_created`) then builds, tests, packs, and publishes the package to NuGet via trusted publishing (OIDC via `NuGet/login@v1`, `--skip-duplicate`) — no manual `dotnet nuget push` and no stored API key. It also attaches the `.nupkg` to the GitHub release and flips the Release PR label from `autorelease: tagged` to `autorelease: published`.
+
 ## Key patterns
 
 When adding new configuration options:
