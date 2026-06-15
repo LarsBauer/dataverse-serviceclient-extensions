@@ -93,20 +93,29 @@ builder.Services.AddDataverseClient(options =>
 
 ### Environment-specific configuration
 
-```json
+Bind the options directly from a configuration section:
+
+```jsonc
 // appsettings.Production.json
 {
   "Dataverse": {
-    "OrganizationUrl": "https://my-org-prod.crm4.dynamics.com"
+    "OrganizationUrl": "https://my-org-prod.crm4.dynamics.com",
+    "DeferConnection": false
   }
 }
 ```
 
 ```csharp
-builder.Services.AddDataverseClient(options =>
-{
-    options.OrganizationUrl = new Uri(builder.Configuration["Dataverse:OrganizationUrl"]!);
-});
+builder.Services.AddDataverseClient(builder.Configuration.GetSection("Dataverse"));
+```
+
+Only non-secret values bind from configuration. Authentication uses `DefaultAzureCredential` by
+default; to supply a custom credential, layer it on with the options pattern:
+
+```csharp
+builder.Services.AddDataverseClient(builder.Configuration.GetSection("Dataverse"));
+builder.Services.PostConfigure<DataverseClientOptions>(options =>
+    options.TokenCredential = new ClientSecretCredential(tenantId, clientId, clientSecret));
 ```
 
 ## Why scoped `IOrganizationServiceAsync2`?
