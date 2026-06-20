@@ -37,4 +37,32 @@ internal static class ServiceClientFactory
 
         return new ServiceClient(connectionOptions, deferConnection: options.DeferConnection);
     }
+
+    public static ServiceClient CreateKeyed(IServiceProvider serviceProvider, string key)
+    {
+        var options = serviceProvider
+            .GetRequiredService<IOptionsMonitor<DataverseClientOptions>>()
+            .Get(key);
+
+        var credential = options.TokenCredential ?? new DefaultAzureCredential();
+
+        var scope = $"{options.OrganizationUrl.GetLeftPart(UriPartial.Authority)}/.default";
+
+        var logger = serviceProvider.GetService<ILoggerFactory>()
+            ?.CreateLogger<ServiceClient>();
+
+        var connectionOptions = new ConnectionOptions
+        {
+            ServiceUri = options.OrganizationUrl,
+            Logger = logger,
+            AccessTokenProviderFunctionAsync = async _ =>
+            {
+                var token = await credential.GetTokenAsync(
+                    new TokenRequestContext([scope]), CancellationToken.None);
+                return token.Token;
+            }
+        };
+
+        return new ServiceClient(connectionOptions, deferConnection: options.DeferConnection);
+    }
 }

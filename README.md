@@ -5,11 +5,12 @@
 [![NuGet Downloads](https://img.shields.io/nuget/dt/BauerApps.Dataverse.Extensions.DependencyInjection)](https://www.nuget.org/packages/BauerApps.Dataverse.Extensions.DependencyInjection)
 [![License](https://img.shields.io/github/license/LarsBauer/dataverse-serviceclient-extensions)](LICENSE)
 
-Dependency injection extensions for [Microsoft.PowerPlatform.Dataverse.Client](https://www.nuget.org/packages/Microsoft.PowerPlatform.Dataverse.Client). Registers a singleton `ServiceClient` and a scoped `IOrganizationServiceAsync2` (via `Clone()`) — the correct pattern most people get wrong.
+Dependency injection extensions for [Microsoft.PowerPlatform.Dataverse.Client](https://www.nuget.org/packages/Microsoft.PowerPlatform.Dataverse.Client). Registers a singleton `ServiceClient` and a scoped `IOrganizationServiceAsync2` (via `Clone()`) with a single method call.
 
 ## Features
 
 - One-line DI registration for `ServiceClient` with proper singleton + scoped `Clone()` lifecycle
+- Keyed (multi-environment) client registration via native .NET keyed DI
 - Authentication via [Azure.Identity](https://www.nuget.org/packages/Azure.Identity) (`DefaultAzureCredential` by default, any `TokenCredential` supported)
 - Automatic logger wiring from the DI container
 - Options validation at startup — fail fast on misconfiguration
@@ -118,9 +119,41 @@ builder.Services.PostConfigure<DataverseClientOptions>(options =>
     options.TokenCredential = new ClientSecretCredential(tenantId, clientId, clientSecret));
 ```
 
+## Keyed clients (multiple environments)
+
+Use keyed registration when your application needs to connect to more than one Dataverse environment — for example a data migration that reads from a source org and writes to a target org.
+
+Register each client with a string key:
+
+```csharp
+builder.Services.AddDataverseClient("source", options =>
+{
+    options.OrganizationUrl = new Uri("https://source.crm4.dynamics.com");
+});
+
+builder.Services.AddDataverseClient("target",
+    builder.Configuration.GetSection("Dataverse:Target"));
+```
+
+Resolve via `[FromKeyedServices]`:
+
+```csharp
+public sealed class MigrationService(
+    [FromKeyedServices("source")] IOrganizationServiceAsync2 source,
+    [FromKeyedServices("target")] IOrganizationServiceAsync2 target)
+{
+    public async Task MigrateAsync()
+    {
+        // read from source, write to target
+    }
+}
+```
+
+Each keyed registration is fully independent — its own singleton `ServiceClient` and its own scoped `IOrganizationServiceAsync2`. Keyed and unkeyed registrations coexist without conflict.
+
 ## Why scoped `IOrganizationServiceAsync2`?
 
-`ServiceClient` is registered as a **singleton** to share the underlying connection, metadata cache, and authentication token. However, using a single instance across concurrent requests can cause issues (e.g., `CallerId` leaking between requests).
+`ServiceClient` is registered as a **singleton** to share the underlying connection, metadata cache, and authentication token. However, using a single instance across concurrent requests can cause subtle threading issues.
 
 `Clone()` creates a lightweight copy that shares the parent's connection pool but is safe for per-request use. This library registers `IOrganizationServiceAsync2` as **scoped**, so each request gets its own clone automatically.
 
