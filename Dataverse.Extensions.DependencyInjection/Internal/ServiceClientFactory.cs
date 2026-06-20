@@ -38,11 +38,11 @@ internal static class ServiceClientFactory
         return new ServiceClient(connectionOptions, deferConnection: options.DeferConnection);
     }
 
-    public static ServiceClient CreateNamed(IServiceProvider serviceProvider, string name)
+    public static ServiceClient CreateKeyed(IServiceProvider serviceProvider, string key)
     {
         var options = serviceProvider
             .GetRequiredService<IOptionsMonitor<DataverseClientOptions>>()
-            .Get(name);
+            .Get(key);
 
         var credential = options.TokenCredential ?? new DefaultAzureCredential();
 
