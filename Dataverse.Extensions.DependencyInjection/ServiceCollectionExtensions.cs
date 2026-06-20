@@ -50,34 +50,44 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers keyed singleton and scoped Dataverse services for the given client name.
+    /// Registers a keyed singleton <see cref="ServiceClient"/> and a keyed scoped
+    /// <see cref="IOrganizationServiceAsync2"/> (via <see cref="ServiceClient.Clone(Microsoft.Extensions.Logging.ILogger)"/>)
+    /// in the dependency injection container under the given <paramref name="key"/>.
     /// </summary>
-    /// <param name="name">The keyed service name.</param>
-    /// <param name="configureOptions">Action to configure named <see cref="DataverseClientOptions"/>.</param>
+    /// <param name="key">The service key used to resolve this client via <c>[FromKeyedServices]</c>.</param>
+    /// <param name="configureOptions">Action to configure <see cref="DataverseClientOptions"/> for this key.</param>
     /// <returns>The service collection for chaining.</returns>
-    public IServiceCollection AddDataverseClient(string name, Action<DataverseClientOptions> configureOptions)
+    public IServiceCollection AddDataverseClient(string key, Action<DataverseClientOptions> configureOptions)
     {
-      services.AddOptionsWithValidateOnStart<DataverseClientOptions>(name)
-        .Configure(configureOptions)
+      services.AddOptionsWithValidateOnStart<DataverseClientOptions>(key)
+        .Configure(key, configureOptions)
         .ValidateDataverseClientOptions();
 
-      return services.AddNamedDataverseClientCore(name);
+      return services.AddKeyedDataverseClientCore(key);
     }
 
     /// <summary>
-    /// Registers keyed singleton and scoped Dataverse services for the given client name,
-    /// binding named options from the supplied configuration section.
+    /// Registers a keyed singleton <see cref="ServiceClient"/> and a keyed scoped
+    /// <see cref="IOrganizationServiceAsync2"/> (via <see cref="ServiceClient.Clone(Microsoft.Extensions.Logging.ILogger)"/>)
+    /// in the dependency injection container under the given <paramref name="key"/>,
+    /// binding <see cref="DataverseClientOptions"/> from the supplied configuration section.
     /// </summary>
-    /// <param name="name">The keyed service name.</param>
-    /// <param name="configuration">Configuration section to bind named options from.</param>
+    /// <param name="key">The service key used to resolve this client via <c>[FromKeyedServices]</c>.</param>
+    /// <param name="configuration">Configuration section to bind <see cref="DataverseClientOptions"/> from.</param>
     /// <returns>The service collection for chaining.</returns>
-    public IServiceCollection AddDataverseClient(string name, IConfiguration configuration)
+    /// <remarks>
+    /// Only non-secret values bind from configuration (e.g. <c>OrganizationUrl</c>,
+    /// <c>DeferConnection</c>). Authentication uses <see cref="Azure.Identity.DefaultAzureCredential"/>
+    /// by default; to use a custom credential, set <see cref="DataverseClientOptions.TokenCredential"/>
+    /// via <see cref="OptionsServiceCollectionExtensions.PostConfigure{TOptions}(IServiceCollection, Action{TOptions})"/>.
+    /// </remarks>
+    public IServiceCollection AddDataverseClient(string key, IConfiguration configuration)
     {
-      services.AddOptionsWithValidateOnStart<DataverseClientOptions>(name)
-        .Bind(configuration)
+      services.AddOptionsWithValidateOnStart<DataverseClientOptions>(key)
+        .Bind(key, configuration)
         .ValidateDataverseClientOptions();
 
-      return services.AddNamedDataverseClientCore(name);
+      return services.AddKeyedDataverseClientCore(key);
     }
 
     private IServiceCollection AddDataverseClientCore()
@@ -91,13 +101,13 @@ public static class ServiceCollectionExtensions
       return services;
     }
 
-    private IServiceCollection AddNamedDataverseClientCore(string name)
+    private IServiceCollection AddKeyedDataverseClientCore(string key)
     {
-      services.AddKeyedSingleton<ServiceClient>(name,
-        (sp, key) => ServiceClientFactory.CreateNamed(sp, (string)key!));
+      services.AddKeyedSingleton<ServiceClient>(key,
+        (sp, k) => ServiceClientFactory.CreateKeyed(sp, (string)k!));
 
-      services.AddKeyedScoped<IOrganizationServiceAsync2>(name,
-        (sp, key) => sp.GetRequiredKeyedService<ServiceClient>(key).Clone());
+      services.AddKeyedScoped<IOrganizationServiceAsync2>(key,
+        (sp, k) => sp.GetRequiredKeyedService<ServiceClient>(k).Clone());
 
       return services;
     }
