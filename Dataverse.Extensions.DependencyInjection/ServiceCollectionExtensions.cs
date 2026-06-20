@@ -59,8 +59,10 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for chaining.</returns>
     public IServiceCollection AddDataverseClient(string key, Action<DataverseClientOptions> configureOptions)
     {
+      // AddOptionsWithValidateOnStart(key) scopes the builder to the named instance;
+      // Configure(action) without a name argument binds to that same named instance.
       services.AddOptionsWithValidateOnStart<DataverseClientOptions>(key)
-        .Configure(key, configureOptions)
+        .Configure(configureOptions)
         .ValidateDataverseClientOptions();
 
       return services.AddKeyedDataverseClientCore(key);
@@ -83,8 +85,10 @@ public static class ServiceCollectionExtensions
     /// </remarks>
     public IServiceCollection AddDataverseClient(string key, IConfiguration configuration)
     {
+      // AddOptionsWithValidateOnStart(key) scopes the builder to the named instance;
+      // Bind(configuration) without a name argument binds to that same named instance.
       services.AddOptionsWithValidateOnStart<DataverseClientOptions>(key)
-        .Bind(key, configuration)
+        .Bind(configuration)
         .ValidateDataverseClientOptions();
 
       return services.AddKeyedDataverseClientCore(key);
