@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/LarsBauer/dataverse-serviceclient-extensions/compare/v1.1.0...v1.2.0) (2026-06-20)
+
+
+### Features
+
+* add keyed Dataverse client registration ([#9](https://github.com/LarsBauer/dataverse-serviceclient-extensions/issues/9)) ([8f6e645](https://github.com/LarsBauer/dataverse-serviceclient-extensions/commit/8f6e6456b59d9623a751917cdeeef013baad26b0))
+
 ## [1.1.0](https://github.com/LarsBauer/dataverse-serviceclient-extensions/compare/v1.0.0...v1.1.0) (2026-06-15)
 
 
