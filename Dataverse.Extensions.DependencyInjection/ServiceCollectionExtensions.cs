@@ -49,6 +49,37 @@ public static class ServiceCollectionExtensions
       return services.AddDataverseClientCore();
     }
 
+    /// <summary>
+    /// Registers keyed singleton and scoped Dataverse services for the given client name.
+    /// </summary>
+    /// <param name="name">The keyed service name.</param>
+    /// <param name="configureOptions">Action to configure named <see cref="DataverseClientOptions"/>.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public IServiceCollection AddDataverseClient(string name, Action<DataverseClientOptions> configureOptions)
+    {
+      services.AddOptionsWithValidateOnStart<DataverseClientOptions>(name)
+        .Configure(configureOptions)
+        .ValidateDataverseClientOptions();
+
+      return services.AddNamedDataverseClientCore(name);
+    }
+
+    /// <summary>
+    /// Registers keyed singleton and scoped Dataverse services for the given client name,
+    /// binding named options from the supplied configuration section.
+    /// </summary>
+    /// <param name="name">The keyed service name.</param>
+    /// <param name="configuration">Configuration section to bind named options from.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public IServiceCollection AddDataverseClient(string name, IConfiguration configuration)
+    {
+      services.AddOptionsWithValidateOnStart<DataverseClientOptions>(name)
+        .Bind(configuration)
+        .ValidateDataverseClientOptions();
+
+      return services.AddNamedDataverseClientCore(name);
+    }
+
     private IServiceCollection AddDataverseClientCore()
     {
       services.AddSingleton(ServiceClientFactory.Create);
@@ -56,6 +87,17 @@ public static class ServiceCollectionExtensions
       // Clone requires OAuth-based connection — guaranteed here
       // because we always use AccessTokenProviderFunctionAsync
       services.AddScoped<IOrganizationServiceAsync2>(sp => sp.GetRequiredService<ServiceClient>().Clone());
+
+      return services;
+    }
+
+    private IServiceCollection AddNamedDataverseClientCore(string name)
+    {
+      services.AddKeyedSingleton<ServiceClient>(name,
+        (sp, key) => ServiceClientFactory.CreateNamed(sp, (string)key!));
+
+      services.AddKeyedScoped<IOrganizationServiceAsync2>(name,
+        (sp, key) => sp.GetRequiredKeyedService<ServiceClient>(key).Clone());
 
       return services;
     }
