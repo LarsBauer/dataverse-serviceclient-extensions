@@ -120,14 +120,14 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_RegistersKeyedServiceClient()
+    public async Task AddDataverseClient_Keyed_RegistersKeyedServiceClient()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(name, options =>
+        services.AddDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
             options.DeferConnection = true;
@@ -136,19 +136,19 @@ public class ServiceCollectionExtensionsTests
         // Assert
         await Assert.That(services)
             .Contains(x => x.ServiceType == typeof(ServiceClient)
-                        && x.ServiceKey as string == name
+                        && x.ServiceKey as string == key
                         && x.Lifetime == ServiceLifetime.Singleton);
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_RegistersKeyedScopedIOrganizationServiceAsync2()
+    public async Task AddDataverseClient_Keyed_RegistersKeyedScopedIOrganizationServiceAsync2()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(name, options =>
+        services.AddDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
             options.DeferConnection = true;
@@ -157,20 +157,20 @@ public class ServiceCollectionExtensionsTests
         // Assert
         await Assert.That(services)
             .Contains(x => x.ServiceType == typeof(IOrganizationServiceAsync2)
-                        && x.ServiceKey as string == name
+                        && x.ServiceKey as string == key
                         && x.Lifetime == ServiceLifetime.Scoped);
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_ConfiguresNamedOptions()
+    public async Task AddDataverseClient_Keyed_ConfiguresKeyedOptions()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var organizationUrl = new Uri("https://my-org.crm4.dynamics.com");
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(name, options =>
+        services.AddDataverseClient(key, options =>
         {
             options.OrganizationUrl = organizationUrl;
             options.DeferConnection = true;
@@ -178,7 +178,7 @@ public class ServiceCollectionExtensionsTests
 
         // Assert
         var provider = services.BuildServiceProvider();
-        var options = provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(name);
+        var options = provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(key);
 
         await Assert.That(options.OrganizationUrl).IsEqualTo(organizationUrl);
         await Assert.That(options.DeferConnection).IsTrue();
@@ -186,14 +186,14 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_ReturnsServiceCollectionForChaining()
+    public async Task AddDataverseClient_Keyed_ReturnsServiceCollectionForChaining()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var services = new ServiceCollection();
 
         // Act
-        var result = services.AddDataverseClient(name, options =>
+        var result = services.AddDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
             options.DeferConnection = true;
@@ -204,10 +204,10 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_FromConfiguration_BindsOptionsAndRegistersServices()
+    public async Task AddDataverseClient_Keyed_FromConfiguration_BindsOptionsAndRegistersServices()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -218,21 +218,21 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(name, configuration);
+        services.AddDataverseClient(key, configuration);
 
         // Assert — services registered with the correct lifetimes
         await Assert.That(services)
             .Contains(x => x.ServiceType == typeof(ServiceClient)
-                        && x.ServiceKey as string == name
+                        && x.ServiceKey as string == key
                         && x.Lifetime == ServiceLifetime.Singleton);
         await Assert.That(services)
             .Contains(x => x.ServiceType == typeof(IOrganizationServiceAsync2)
-                        && x.ServiceKey as string == name
+                        && x.ServiceKey as string == key
                         && x.Lifetime == ServiceLifetime.Scoped);
 
         // Assert — non-secret values bound from configuration
         var provider = services.BuildServiceProvider();
-        var options = provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(name);
+        var options = provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(key);
 
         await Assert.That(options.OrganizationUrl)
             .IsEqualTo(new Uri("https://my-org.crm4.dynamics.com"));
@@ -241,42 +241,42 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_DoesNotAffectUnnamedRegistration()
+    public async Task AddDataverseClient_Keyed_DoesNotAffectUnkeyedRegistration()
     {
         // Arrange
-        const string name = "source";
-        var unnamedOrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
-        var namedOrganizationUrl = new Uri("https://named-org.crm4.dynamics.com");
+        const string key = "source";
+        var unkeyedOrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
+        var keyedOrganizationUrl = new Uri("https://keyed-org.crm4.dynamics.com");
 
         var provider = new ServiceCollection()
             .AddDataverseClient(options =>
             {
-                options.OrganizationUrl = unnamedOrganizationUrl;
+                options.OrganizationUrl = unkeyedOrganizationUrl;
                 options.DeferConnection = true;
             })
-            .AddDataverseClient(name, options =>
+            .AddDataverseClient(key, options =>
             {
-                options.OrganizationUrl = namedOrganizationUrl;
+                options.OrganizationUrl = keyedOrganizationUrl;
                 options.DeferConnection = true;
             })
             .BuildServiceProvider();
 
         // Act
-        var unnamedOptions = provider.GetRequiredService<IOptions<DataverseClientOptions>>().Value;
-        var namedOptions = provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(name);
-        var unnamedClient = provider.GetRequiredService<ServiceClient>();
-        var namedClient = provider.GetRequiredKeyedService<ServiceClient>(name);
+        var unkeyedOptions = provider.GetRequiredService<IOptions<DataverseClientOptions>>().Value;
+        var keyedOptions = provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(key);
+        var unkeyedClient = provider.GetRequiredService<ServiceClient>();
+        var keyedClient = provider.GetRequiredKeyedService<ServiceClient>(key);
 
         // Assert
-        await Assert.That(unnamedOptions.OrganizationUrl).IsEqualTo(unnamedOrganizationUrl);
-        await Assert.That(namedOptions.OrganizationUrl).IsEqualTo(namedOrganizationUrl);
-        await Assert.That(unnamedClient).IsNotNull();
-        await Assert.That(namedClient).IsNotNull();
-        await Assert.That(ReferenceEquals(namedClient, unnamedClient)).IsFalse();
+        await Assert.That(unkeyedOptions.OrganizationUrl).IsEqualTo(unkeyedOrganizationUrl);
+        await Assert.That(keyedOptions.OrganizationUrl).IsEqualTo(keyedOrganizationUrl);
+        await Assert.That(unkeyedClient).IsNotNull();
+        await Assert.That(keyedClient).IsNotNull();
+        await Assert.That(ReferenceEquals(keyedClient, unkeyedClient)).IsFalse();
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_TwoNamedClientsCoexist()
+    public async Task AddDataverseClient_Keyed_TwoKeyedClientsCoexist()
     {
         // Arrange
         const string source = "source";
@@ -334,10 +334,10 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_FromConfiguration_ThrowsOnStartWhenOrganizationUrlMissing()
+    public async Task AddDataverseClient_Keyed_FromConfiguration_ThrowsOnStartWhenOrganizationUrlMissing()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -345,11 +345,11 @@ public class ServiceCollectionExtensionsTests
             })
             .Build();
         var provider = new ServiceCollection()
-            .AddDataverseClient(name, configuration)
+            .AddDataverseClient(key, configuration)
             .BuildServiceProvider();
 
         // Act & Assert
-        await Assert.That(() => provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(name))
+        await Assert.That(() => provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(key))
             .Throws<OptionsValidationException>();
     }
 
@@ -371,12 +371,12 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Test]
-    public async Task AddDataverseClient_Named_ThrowsOnStartWhenOrganizationUrlIsNotHttps()
+    public async Task AddDataverseClient_Keyed_ThrowsOnStartWhenOrganizationUrlIsNotHttps()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var provider = new ServiceCollection()
-            .AddDataverseClient(name, options =>
+            .AddDataverseClient(key, options =>
             {
                 options.OrganizationUrl = new Uri("http://my-org.crm4.dynamics.com");
                 options.DeferConnection = true;
@@ -384,7 +384,7 @@ public class ServiceCollectionExtensionsTests
             .BuildServiceProvider();
 
         // Act & Assert
-        await Assert.That(() => provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(name))
+        await Assert.That(() => provider.GetRequiredService<IOptionsMonitor<DataverseClientOptions>>().Get(key))
             .Throws<OptionsValidationException>();
     }
 }

@@ -82,32 +82,32 @@ public class ServiceClientFactoryTests
     }
 
     [Test]
-    public async Task CreateNamed_UsesNamedOptions()
+    public async Task CreateKeyed_UsesKeyedOptions()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var services = new ServiceCollection();
-        services.AddDataverseClient(name, options =>
+        services.AddDataverseClient(key, options =>
         {
-            options.OrganizationUrl = new Uri("https://named-org.crm4.dynamics.com");
+            options.OrganizationUrl = new Uri("https://keyed-org.crm4.dynamics.com");
             options.DeferConnection = true;
         });
         var provider = services.BuildServiceProvider();
 
         // Act
-        var client = ServiceClientFactory.CreateNamed(provider, name);
+        var client = ServiceClientFactory.CreateKeyed(provider, key);
 
         // Assert
         await Assert.That(client).IsNotNull();
     }
 
     [Test]
-    public async Task CreateNamed_UsesDefaultAzureCredentialWhenTokenCredentialIsNull()
+    public async Task CreateKeyed_UsesDefaultAzureCredentialWhenTokenCredentialIsNull()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var services = new ServiceCollection();
-        services.AddDataverseClient(name, options =>
+        services.AddDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
             options.DeferConnection = true;
@@ -115,20 +115,20 @@ public class ServiceClientFactoryTests
         var provider = services.BuildServiceProvider();
 
         // Act
-        var client = ServiceClientFactory.CreateNamed(provider, name);
+        var client = ServiceClientFactory.CreateKeyed(provider, key);
 
         // Assert — client is created without throwing (deferred connection)
         await Assert.That(client).IsNotNull();
     }
 
     [Test]
-    public async Task CreateNamed_UsesCustomTokenCredential()
+    public async Task CreateKeyed_UsesCustomTokenCredential()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var customCredential = new FakeTokenCredential();
         var services = new ServiceCollection();
-        services.AddDataverseClient(name, options =>
+        services.AddDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
             options.TokenCredential = customCredential;
@@ -137,19 +137,19 @@ public class ServiceClientFactoryTests
         var provider = services.BuildServiceProvider();
 
         // Act
-        var client = ServiceClientFactory.CreateNamed(provider, name);
+        var client = ServiceClientFactory.CreateKeyed(provider, key);
 
         // Assert
         await Assert.That(client).IsNotNull();
     }
 
     [Test]
-    public async Task CreateNamed_DoesNotThrowWhenConnectionFailsAndDeferConnectionIsTrue()
+    public async Task CreateKeyed_DoesNotThrowWhenConnectionFailsAndDeferConnectionIsTrue()
     {
         // Arrange
-        const string name = "source";
+        const string key = "source";
         var services = new ServiceCollection();
-        services.AddDataverseClient(name, options =>
+        services.AddDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://invalid-org.crm4.dynamics.com");
             options.DeferConnection = true;
@@ -157,7 +157,7 @@ public class ServiceClientFactoryTests
         var provider = services.BuildServiceProvider();
 
         // Act
-        var client = ServiceClientFactory.CreateNamed(provider, name);
+        var client = ServiceClientFactory.CreateKeyed(provider, key);
 
         // Assert — deferred connection should not throw
         await Assert.That(client).IsNotNull();
@@ -175,4 +175,3 @@ public class ServiceClientFactoryTests
             => new(new AccessToken("fake-token", DateTimeOffset.UtcNow.AddHours(1)));
     }
 }
-
