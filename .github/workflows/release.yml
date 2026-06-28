@@ -12,8 +12,10 @@ jobs:
       issues: write
       pull-requests: write
     outputs:
-      release_created: ${{ steps.release.outputs['Dataverse.Extensions.DependencyInjection--release_created'] }}
-      tag_name: ${{ steps.release.outputs['Dataverse.Extensions.DependencyInjection--tag_name'] }}
+      dependency_injection_release_created: ${{ steps.release.outputs['Dataverse.Extensions.DependencyInjection--release_created'] }}
+      dependency_injection_tag_name: ${{ steps.release.outputs['Dataverse.Extensions.DependencyInjection--tag_name'] }}
+      health_checks_release_created: ${{ steps.release.outputs['Dataverse.Extensions.HealthChecks--release_created'] }}
+      health_checks_tag_name: ${{ steps.release.outputs['Dataverse.Extensions.HealthChecks--tag_name'] }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
@@ -22,12 +24,21 @@ jobs:
 
   publish:
     needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
+    if: matrix.release_created == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
       pull-requests: write
+    strategy:
+      matrix:
+        include:
+          - project: Dataverse.Extensions.DependencyInjection
+            release_created: ${{ needs.release-please.outputs.dependency_injection_release_created }}
+            tag_name: ${{ needs.release-please.outputs.dependency_injection_tag_name }}
+          - project: Dataverse.Extensions.HealthChecks
+            release_created: ${{ needs.release-please.outputs.health_checks_release_created }}
+            tag_name: ${{ needs.release-please.outputs.health_checks_tag_name }}
     steps:
       - uses: actions/checkout@v6
 
@@ -46,7 +57,7 @@ jobs:
         run: dotnet test Dataverse.Extensions.slnx --configuration Release --no-build
 
       - name: Pack NuGet package
-        run: dotnet pack Dataverse.Extensions.DependencyInjection/Dataverse.Extensions.DependencyInjection.csproj --configuration Release --no-build --output ./artifacts
+        run: dotnet pack ${{ matrix.project }}/${{ matrix.project }}.csproj --configuration Release --no-build --output ./artifacts
 
       - name: NuGet login (OIDC → temp API key)
         uses: NuGet/login@v1
@@ -60,7 +71,7 @@ jobs:
       - name: Upload NuGet package to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" ./artifacts/*.nupkg --clobber
+        run: gh release upload "${{ matrix.tag_name }}" ./artifacts/*.nupkg --clobber
 
       - name: Label Release PR as published
         env:

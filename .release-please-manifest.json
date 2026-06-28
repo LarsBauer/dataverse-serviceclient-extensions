@@ -1,5 +1,6 @@
 {
-  "Dataverse.Extensions.DependencyInjection": "1.2.0"
+  "Dataverse.Extensions.DependencyInjection": "1.2.0",
+  "Dataverse.Extensions.HealthChecks": "0.0.0"
 }
 
 

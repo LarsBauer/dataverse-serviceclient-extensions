@@ -3,11 +3,23 @@
     "Dataverse.Extensions.DependencyInjection": {
       "release-type": "simple",
       "package-name": "BauerApps.Dataverse.Extensions.DependencyInjection",
-      "include-component-in-tag": false,
+      "include-component-in-tag": true,
       "extra-files": [
         {
           "type": "generic",
           "path": "Dataverse.Extensions.DependencyInjection.csproj"
+        }
+      ],
+      "changelog-path": "CHANGELOG.md"
+    },
+    "Dataverse.Extensions.HealthChecks": {
+      "release-type": "simple",
+      "package-name": "BauerApps.Dataverse.Extensions.HealthChecks",
+      "include-component-in-tag": true,
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "Dataverse.Extensions.HealthChecks.csproj"
         }
       ],
       "changelog-path": "CHANGELOG.md"
