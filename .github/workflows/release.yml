@@ -12,6 +12,7 @@ jobs:
       issues: write
       pull-requests: write
     outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
       dependency_injection_release_created: ${{ steps.release.outputs['Dataverse.Extensions.DependencyInjection--release_created'] }}
       dependency_injection_tag_name: ${{ steps.release.outputs['Dataverse.Extensions.DependencyInjection--tag_name'] }}
       health_checks_release_created: ${{ steps.release.outputs['Dataverse.Extensions.HealthChecks--release_created'] }}
@@ -24,7 +25,7 @@ jobs:
 
   publish:
     needs: release-please
-    if: matrix.release_created == 'true'
+    if: needs.release-please.outputs.releases_created == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -41,39 +42,49 @@ jobs:
             tag_name: ${{ needs.release-please.outputs.health_checks_tag_name }}
     steps:
       - uses: actions/checkout@v6
+        if: matrix.release_created == 'true'
 
       - name: Setup .NET
+        if: matrix.release_created == 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.x
 
       - name: Restore dependencies
+        if: matrix.release_created == 'true'
         run: dotnet restore Dataverse.Extensions.slnx
 
       - name: Build
+        if: matrix.release_created == 'true'
         run: dotnet build Dataverse.Extensions.slnx --configuration Release --no-restore
 
       - name: Run tests
+        if: matrix.release_created == 'true'
         run: dotnet test Dataverse.Extensions.slnx --configuration Release --no-build
 
       - name: Pack NuGet package
+        if: matrix.release_created == 'true'
         run: dotnet pack ${{ matrix.project }}/${{ matrix.project }}.csproj --configuration Release --no-build --output ./artifacts
 
       - name: NuGet login (OIDC → temp API key)
+        if: matrix.release_created == 'true'
         uses: NuGet/login@v1
         id: login
         with:
           user: ${{ secrets.NUGET_USER }}
 
       - name: Publish NuGet package
+        if: matrix.release_created == 'true'
         run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Upload NuGet package to GitHub Release
+        if: matrix.release_created == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "${{ matrix.tag_name }}" ./artifacts/*.nupkg --clobber
 
       - name: Label Release PR as published
+        if: matrix.release_created == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
