@@ -61,7 +61,7 @@ Solution uses `.slnx` format (XML-based). Tests use **TUnit** — `[Test]` attri
 - **Tags**: Both packages use `"include-component-in-tag": true`, giving namespaced tags: `Dataverse.Extensions.DependencyInjection-vX.Y.Z` and `Dataverse.Extensions.HealthChecks-vX.Y.Z`.
 - **Commit messages**: [Conventional Commits](https://www.conventionalcommits.org/). release-please tracks which package directory is touched and only bumps the relevant package.
 - **CI** (`.github/workflows/ci.yml`): Builds and tests the full solution on every push/PR to `main`.
-- **Release** (`.github/workflows/release.yml`): release-please opens/updates Release PRs per package. The `publish` job uses a **matrix strategy** — one entry per package, each gated on its own `release_created` output. Adding a new package requires one new matrix entry.
+- **Release** (`.github/workflows/release.yml`): release-please opens/updates Release PRs per package. The `publish` job uses a **matrix strategy** gated on `releases_created` at the job level and `matrix.release_created` per step. Adding a new package requires two new output lines in the `release-please` job and one new matrix entry in `publish`.
 
 ## Release process
 
@@ -79,7 +79,7 @@ Solution uses `.slnx` format (XML-based). Tests use **TUnit** — `[Test]` attri
 | `feat!:` / `BREAKING CHANGE:` footer | major bump |
 | `docs:`, `chore:`, `test:`, `refactor:`, `ci:`, `build:` | no release |
 
-Scopes are optional (e.g. `feat(healthchecks): ...`). Squash-merge PRs with a Conventional Commit title.
+Scopes are optional (e.g. `feat(healthchecks): ...`). Use **rebase-and-merge** to preserve individual commits when a PR contains multiple conventional commit types (e.g. a structural `chore:` alongside a `feat!:`). Use squash-merge only when all changes belong to a single conventional commit.
 
 **Typical workflow**:
 
@@ -101,9 +101,10 @@ Scopes are optional (e.g. `feat(healthchecks): ...`). Squash-merge PRs with a Co
 1. Create `Dataverse.Extensions.<Name>/` and `Dataverse.Extensions.<Name>.Tests/` directories
 2. Add both projects to `Dataverse.Extensions.slnx`
 3. Add package entry to `release-please-config.json` with `include-component-in-tag: true`
-4. Add version entry to `.release-please-manifest.json`
-5. Add one matrix entry to the `publish` job in `.github/workflows/release.yml`
-6. Update root `README.md` packages table and `AGENTS.md`
+4. Add version entry to `.release-please-manifest.json` (start at `0.0.0`)
+5. Add two output lines to the `release-please` job in `.github/workflows/release.yml`
+6. Add one matrix entry to the `publish` job in `.github/workflows/release.yml`
+7. Update root `README.md` packages table and `AGENTS.md`
 
 **Keyed registrations (DI package)**:
 - Use `AddKeyedSingleton` / `AddKeyedScoped` — never reuse the unkeyed core path
