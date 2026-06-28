@@ -6,4 +6,6 @@
   </Configurations>
   <Project Path="Dataverse.Extensions.DependencyInjection/Dataverse.Extensions.DependencyInjection.csproj" />
   <Project Path="Dataverse.Extensions.DependencyInjection.Tests/Dataverse.Extensions.DependencyInjection.Tests.csproj" />
+  <Project Path="Dataverse.Extensions.HealthChecks/Dataverse.Extensions.HealthChecks.csproj" />
+  <Project Path="Dataverse.Extensions.HealthChecks.Tests/Dataverse.Extensions.HealthChecks.Tests.csproj" />
 </Solution>
