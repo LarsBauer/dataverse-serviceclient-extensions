@@ -23,7 +23,7 @@ When in doubt, prefer *not* adding something.
 
 ### DependencyInjection (`Dataverse.Extensions.DependencyInjection/`)
 
-- `ServiceCollectionExtensions.cs` — Public API. `AddDataverseClient()` overloads: unkeyed (action + `IConfiguration`) and keyed (same with leading `string key`). C# 14 `extension` block style.
+- `ServiceCollectionExtensions.cs` — Public API. Unkeyed: `AddDataverseClient()` (action + `IConfiguration`). Keyed: `AddKeyedDataverseClient(string key, ...)` with Action/IConfiguration variants. Legacy keyed overloads `AddDataverseClient(string key, ...)` are obsolete and will be removed in v2.0.0. C# 14 `extension` block style.
 - `DataverseClientOptions.cs` — Options POCO: `OrganizationUrl` (required), `TokenCredential`, `DeferConnection`.
 - `Internal/ServiceClientFactory.cs` — Factory: `Create` (unkeyed, `IOptions<T>`) and `CreateKeyed` (`IOptionsMonitor<T>.Get(key)`). Marked `internal`, tested via `InternalsVisibleTo`.
 - Root namespace: `BauerApps.Dataverse.Extensions`.
@@ -52,6 +52,7 @@ Solution uses `.slnx` format (XML-based). Tests use **TUnit** — `[Test]` attri
 - **Test pattern (HealthChecks)**: Use `IOrganizationServiceAsync2.Mock()` (TUnit.Mocks source-generated) to mock the service. Set up return values with `.Returns(...)` and exceptions with `.Throws(...)`. Use `Any<T>()` for argument matching.
 - **Test naming**: Method name directly for unkeyed (e.g. `AddDataverseHealthCheck_RegistersHealthCheck`), `_Keyed_` segment for keyed (e.g. `AddKeyedDataverseHealthCheck_DefaultsNameToServiceKey`).
 - **C# 14 features**: Uses `extension` blocks inside a `public static class`. Keep this style for new extensions.
+- **Keyed extension methods**: For new packages, use separate methods with `Keyed` prefix (e.g., `AddKeyedXxx()`) rather than overloading the unkeyed method. This matches .NET's own DI container conventions (`AddKeyedSingleton`, `AddKeyedScoped`) and improves discoverability. *Note: The DependencyInjection package uses overloads (`AddDataverseClient(string key, ...)`) for historical reasons; new packages should follow the HealthChecks pattern (`AddKeyedDataverseHealthCheck()`).*
 - **Per-package READMEs**: Each package directory has its own `README.md` that is packed into the NuGet. The root `README.md` is a repo-level overview only.
 - **Documentation**: Both `README.md` files (root + per-package) and `AGENTS.md` **must be updated** when features change.
 
