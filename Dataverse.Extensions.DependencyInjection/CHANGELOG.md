@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/LarsBauer/dataverse-serviceclient-extensions/compare/BauerApps.Dataverse.Extensions.DependencyInjection-v1.2.0...BauerApps.Dataverse.Extensions.DependencyInjection-v1.3.0) (2026-07-04)
+
+
+### Features
+
+* **di:** add AddKeyedDataverseClient methods, mark legacy overloads obsolete ([#15](https://github.com/LarsBauer/dataverse-serviceclient-extensions/issues/15)) ([4686422](https://github.com/LarsBauer/dataverse-serviceclient-extensions/commit/4686422b83f635433b7bfa79cc1d671711cdee77))
+
 ## [1.2.0](https://github.com/LarsBauer/dataverse-serviceclient-extensions/compare/v1.1.0...v1.2.0) (2026-06-20)
 
 
