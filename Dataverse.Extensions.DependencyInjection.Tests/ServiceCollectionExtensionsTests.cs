@@ -127,7 +127,7 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(key, options =>
+        services.AddKeyedDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
             options.DeferConnection = true;
@@ -148,7 +148,7 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(key, options =>
+        services.AddKeyedDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
             options.DeferConnection = true;
@@ -170,7 +170,7 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(key, options =>
+        services.AddKeyedDataverseClient(key, options =>
         {
             options.OrganizationUrl = organizationUrl;
             options.DeferConnection = true;
@@ -193,7 +193,7 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        var result = services.AddDataverseClient(key, options =>
+        var result = services.AddKeyedDataverseClient(key, options =>
         {
             options.OrganizationUrl = new Uri("https://my-org.crm4.dynamics.com");
             options.DeferConnection = true;
@@ -218,7 +218,7 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(key, configuration);
+        services.AddKeyedDataverseClient(key, configuration);
 
         // Assert — services registered with the correct lifetimes
         await Assert.That(services)
@@ -254,7 +254,7 @@ public class ServiceCollectionExtensionsTests
                 options.OrganizationUrl = unkeyedOrganizationUrl;
                 options.DeferConnection = true;
             })
-            .AddDataverseClient(key, options =>
+            .AddKeyedDataverseClient(key, options =>
             {
                 options.OrganizationUrl = keyedOrganizationUrl;
                 options.DeferConnection = true;
@@ -286,12 +286,12 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        services.AddDataverseClient(source, options =>
+        services.AddKeyedDataverseClient(source, options =>
         {
             options.OrganizationUrl = sourceOrganizationUrl;
             options.DeferConnection = true;
         });
-        services.AddDataverseClient(target, options =>
+        services.AddKeyedDataverseClient(target, options =>
         {
             options.OrganizationUrl = targetOrganizationUrl;
             options.DeferConnection = true;
@@ -345,7 +345,7 @@ public class ServiceCollectionExtensionsTests
             })
             .Build();
         var provider = new ServiceCollection()
-            .AddDataverseClient(key, configuration)
+            .AddKeyedDataverseClient(key, configuration)
             .BuildServiceProvider();
 
         // Act & Assert
@@ -376,7 +376,7 @@ public class ServiceCollectionExtensionsTests
         // Arrange
         const string key = "source";
         var provider = new ServiceCollection()
-            .AddDataverseClient(key, options =>
+            .AddKeyedDataverseClient(key, options =>
             {
                 options.OrganizationUrl = new Uri("http://my-org.crm4.dynamics.com");
                 options.DeferConnection = true;

@@ -123,17 +123,19 @@ builder.Services.PostConfigure<DataverseClientOptions>(options =>
 
 Use keyed registration when your application needs to connect to more than one Dataverse environment — for example a data migration that reads from a source org and writes to a target org.
 
-Register each client with a string key:
+Register each client with a string key using `AddKeyedDataverseClient`:
 
 ```csharp
-builder.Services.AddDataverseClient("source", options =>
+builder.Services.AddKeyedDataverseClient("source", options =>
 {
     options.OrganizationUrl = new Uri("https://source.crm4.dynamics.com");
 });
 
-builder.Services.AddDataverseClient("target",
+builder.Services.AddKeyedDataverseClient("target",
     builder.Configuration.GetSection("Dataverse:Target"));
 ```
+
+> **Note:** The legacy overloads `AddDataverseClient(string key, ...)` are obsolete and will be removed in v2.0.0. Use `AddKeyedDataverseClient` for new code.
 
 Resolve via `[FromKeyedServices]`:
 

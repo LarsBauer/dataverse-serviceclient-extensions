@@ -57,7 +57,7 @@ public static class ServiceCollectionExtensions
     /// <param name="key">The service key used to resolve this client via <c>[FromKeyedServices]</c>.</param>
     /// <param name="configureOptions">Action to configure <see cref="DataverseClientOptions"/> for this key.</param>
     /// <returns>The service collection for chaining.</returns>
-    public IServiceCollection AddDataverseClient(string key, Action<DataverseClientOptions> configureOptions)
+    public IServiceCollection AddKeyedDataverseClient(string key, Action<DataverseClientOptions> configureOptions)
     {
       // AddOptionsWithValidateOnStart(key) scopes the builder to the named instance;
       // Configure(action) without a name argument binds to that same named instance.
@@ -67,6 +67,44 @@ public static class ServiceCollectionExtensions
 
       return services.AddKeyedDataverseClientCore(key);
     }
+
+    /// <summary>
+    /// Registers a keyed singleton <see cref="ServiceClient"/> and a keyed scoped
+    /// <see cref="IOrganizationServiceAsync2"/> (via <see cref="ServiceClient.Clone(Microsoft.Extensions.Logging.ILogger)"/>)
+    /// in the dependency injection container under the given <paramref name="key"/>
+    /// , binding <see cref="DataverseClientOptions"/> from the supplied configuration section.
+    /// </summary>
+    /// <param name="key">The service key used to resolve this client via <c>[FromKeyedServices]</c>.</param>
+    /// <param name="configuration">Configuration section to bind <see cref="DataverseClientOptions"/> from.</param>
+    /// <returns>The service collection for chaining.</returns>
+    /// <remarks>
+    /// Only non-secret values bind from configuration (e.g. <c>OrganizationUrl</c>,
+    /// <c>DeferConnection</c>). Authentication uses <see cref="Azure.Identity.DefaultAzureCredential"/>
+    /// by default; to use a custom credential, set <see cref="DataverseClientOptions.TokenCredential"/>
+    /// via <see cref="OptionsServiceCollectionExtensions.PostConfigure{TOptions}(IServiceCollection, Action{TOptions})"/>.
+    /// </remarks>
+    public IServiceCollection AddKeyedDataverseClient(string key, IConfiguration configuration)
+    {
+      // AddOptionsWithValidateOnStart(key) scopes the builder to the named instance;
+      // Bind(configuration) without a name argument binds to that same named instance.
+      services.AddOptionsWithValidateOnStart<DataverseClientOptions>(key)
+        .Bind(configuration)
+        .ValidateDataverseClientOptions();
+
+      return services.AddKeyedDataverseClientCore(key);
+    }
+
+    /// <summary>
+    /// Registers a keyed singleton <see cref="ServiceClient"/> and a keyed scoped
+    /// <see cref="IOrganizationServiceAsync2"/> (via <see cref="ServiceClient.Clone(Microsoft.Extensions.Logging.ILogger)"/>)
+    /// in the dependency injection container under the given <paramref name="key"/>.
+    /// </summary>
+    /// <param name="key">The service key used to resolve this client via <c>[FromKeyedServices]</c>.</param>
+    /// <param name="configureOptions">Action to configure <see cref="DataverseClientOptions"/> for this key.</param>
+    /// <returns>The service collection for chaining.</returns>
+    [Obsolete("Use AddKeyedDataverseClient instead. Will be removed in v2.0.0.")]
+    public IServiceCollection AddDataverseClient(string key, Action<DataverseClientOptions> configureOptions)
+        => services.AddKeyedDataverseClient(key, configureOptions);
 
     /// <summary>
     /// Registers a keyed singleton <see cref="ServiceClient"/> and a keyed scoped
@@ -83,16 +121,9 @@ public static class ServiceCollectionExtensions
     /// by default; to use a custom credential, set <see cref="DataverseClientOptions.TokenCredential"/>
     /// via <see cref="OptionsServiceCollectionExtensions.PostConfigure{TOptions}(IServiceCollection, Action{TOptions})"/>.
     /// </remarks>
+    [Obsolete("Use AddKeyedDataverseClient instead. Will be removed in v2.0.0.")]
     public IServiceCollection AddDataverseClient(string key, IConfiguration configuration)
-    {
-      // AddOptionsWithValidateOnStart(key) scopes the builder to the named instance;
-      // Bind(configuration) without a name argument binds to that same named instance.
-      services.AddOptionsWithValidateOnStart<DataverseClientOptions>(key)
-        .Bind(configuration)
-        .ValidateDataverseClientOptions();
-
-      return services.AddKeyedDataverseClientCore(key);
-    }
+        => services.AddKeyedDataverseClient(key, configuration);
 
     private IServiceCollection AddDataverseClientCore()
     {
